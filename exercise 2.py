@@ -1,30 +1,41 @@
-class Person:
-    def __init__(self, name, surname):
+class Student:
+    def __init__(self, name, surname, gender):
         self.name = name
         self.surname = surname
-
-
-class Student(Person):
-    def __init__(self, name, surname, gender):
-        super().__init__(name, surname)
         self.gender = gender
         self.finished_courses = []
         self.courses_in_progress = []
         self.grades = {}
 
     def rate_lecturer(self, lecturer, course, grade):
-        if isinstance(lecturer, Lecturer) and course in self.courses_in_progress:
-            if course in lecturer.grades:
+        if course in self.courses_in_progress and course in lecturer.courses_attached:
+            if lecturer in self.grades:
                 lecturer.grades[course].append(grade)
             else:
                 lecturer.grades[course] = [grade]
         else:
-            return 'Ошибка'
+            return "ошибка"
+
+    def __eq__(self, other):
+        if not isinstance(other, Student):
+            return False
+        return (
+            self.name == other.name
+            and self.surname == other.surname
+            and self.gender == other.gender
+            and self.finished_courses == other.finished_courses
+            and self.courses_in_progress == other.courses_in_progress
+            and self.grades == other.grades
+        )
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
-class Mentor(Person):
+class Mentor:
     def __init__(self, name, surname):
-        super().__init__(name, surname)
+        self.name = name
+        self.surname = surname
         self.courses_attached = []
 
     def rate_hw(self, student, course, grade):
@@ -34,21 +45,23 @@ class Mentor(Person):
             else:
                 student.grades[course] = [grade]
         else:
-            return 'Ошибка'
+            return "ошибка"
+
+    def __eq__(self, other):
+        if not isinstance(other, Mentor):
+            return False
+        return self.name == other.name and self.surname == other.surname
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Lecturer(Mentor):
-    def __init__(self, name, surname):
-        super().__init__(name, surname)
-        self.grades = {}
+    pass
 
 
 class Reviewer(Mentor):
-    def __init__(self, name, surname):
-        super().__init__(name, surname)
-
-    def rate_hw(self, student, course, grade):
-        pass
+    pass
 
 
 best_student = Student('Ruoy', 'Eman', 'your_gender')
@@ -57,7 +70,14 @@ best_student.courses_in_progress += ['Python']
 cool_lecturer = Lecturer('Some', 'Buddy')
 cool_lecturer.courses_attached += ['Python']
 
-best_student.rate_lecturer(cool_lecturer, 'Python', 9)
-best_student.rate_lecturer(cool_lecturer, 'Python', 8)
+cool_reviewer = Reviewer('Another', 'Person')
+cool_reviewer.courses_attached += ['Python']
 
+cool_lecturer.rate_hw(best_student, 'Python', 10)
+cool_lecturer.rate_hw(best_student, 'Python', 10)
+cool_lecturer.rate_hw(best_student, 'Python', 10)
+
+best_student.rate_lecturer(cool_lecturer, 'Python', 9)
+
+print(best_student.grades)
 print(cool_lecturer.grades)
